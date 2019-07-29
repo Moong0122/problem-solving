@@ -3,7 +3,7 @@
 int arr[1000001];
 int main(){
     int max = -1;
-    int n, one, two;
+    int n, one = 0, two = 0;
     for(int i=2;i<=1000000;i++){
         arr[i] = i;
     }
@@ -20,14 +20,12 @@ int main(){
             break;
         for(int i = 2;i<=n/2;i++){
             if(arr[i] != 0 && arr[n-i] != 0){
-                if( n-2*i > max ){
-                    max = n-2*i;
-                    one = i;
-                    two = n-i;
-                }
+                one = i;
+                two = n-i;
+                break;
             }
         }
-        if(max == -1)
+        if(one == 0 && two == 0)
             printf("Goldbach's conjecture is wrong.\n");
         else
             printf("%d = %d + %d\n",n,one,two);
