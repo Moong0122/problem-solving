@@ -11,6 +11,7 @@ int check_visit[MAX][MAX];
 int total_check[MAX][MAX];
 void BFS(int y,int x);
 void makeclear();
+bool isGo(int y, int x);
 int main(){
     cin >> n >> l >> r;
     for(int i=0;i<n;i++){
