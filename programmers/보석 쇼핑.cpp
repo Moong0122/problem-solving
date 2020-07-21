@@ -49,3 +49,59 @@ vector<int> solution(vector<string> gems) {
     answer.push_back(back+1);
     return answer;
 }
+
+/*
+ #include <string>
+ #include <vector>
+ #include <unordered_map>
+ #include <set>
+ using namespace std;
+
+ set<string> gems_list;
+ unordered_map<string, int> m;
+
+ vector<int> solution(vector<string> gems) {
+     int left = 0, right = 0, gems_cnt;
+     int len = (int)gems.size();
+     
+     vector<int> answer(2);
+     answer[0] = 0;
+     answer[1] = len-1;
+     
+     for(int i = 0 ; i < len ; i++) gems_list.insert(gems[i]);
+     gems_cnt = (int)gems_list.size(); // 보석 종류의 개수
+     
+     m[gems[0]]++;
+     while(1){
+         if(m.size() == gems_cnt){
+             if(answer[1] - answer[0] > right - left){
+                 answer[1] = right;
+                 answer[0] = left;
+             }
+             if(left == right) break;
+             else{
+                 m[gems[left]]--;
+                 if(m[gems[left]] == 0) m.erase(gems[left]);
+                 left++;
+             }
+         }
+         else if(m.size() > gems_cnt){
+             if(left + 1 >= len) break;
+             else{
+                 m[gems[left]]--;
+                 if(m[gems[left]] == 0) m.erase(gems[left]);
+                 left++;
+             }
+         }
+         else if(m.size() < gems_cnt){
+             if(right + 1 >= len) break;
+             else{
+                 m[gems[++right]]++;
+             }
+         }
+     }
+     answer[0]++;
+     answer[1]++;
+     return answer;
+ }
+ */
