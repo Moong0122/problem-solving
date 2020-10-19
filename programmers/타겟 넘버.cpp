@@ -19,3 +19,23 @@ int solution(vector<int> numbers, int target){
     return answer;
 }
 
+// 다시 풀어보기
+#include <string>
+#include <vector>
+using namespace std;
+
+int answer = 0;
+void dfs(int sum , int index, vector<int>& numbers, int target){
+    if (index == numbers.size()) {
+        if (sum == target) {
+            answer++;
+        }
+        return;
+    }
+    dfs(-numbers[index] + sum, index + 1, numbers, target);
+    dfs(numbers[index] + sum, index + 1, numbers, target);
+}
+int solution(vector<int> numbers, int target) {
+    dfs(0, 0, numbers, target);
+    return answer;
+}
