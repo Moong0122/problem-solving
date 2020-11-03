@@ -125,3 +125,125 @@ int solution(vector<vector<int>> board){
     }
     return 0;
 }
+
+
+// 풀이 보고 공부하기
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+// 로봇의 위치와 자세를 저장하기 위한 자료형
+// 가로 방향인 경우 (r, c)는 왼쪽, 세로 방향인 경우 (r, c)는 위쪽
+class robot {
+    public:
+        int r = 0; // row
+        int c = 0; // column
+        int d = 0; // direction (0: 가로, 1: 세로)
+    
+    robot(int _r, int _c, int _d) : r(_r), c(_c), d(_d) {}
+};
+
+int solution(vector<vector<int>> board) {
+    int N = (int)board.size();
+
+    vector<vector<vector<int>>> check(N, vector<vector<int>>(N, vector<int>(2, -1)));
+    
+    // 오른쪽, 아래, 왼쪽, 위
+    int dc[4] = {1, 0, -1, 0};
+    int dr[4] = {0, 1, 0, -1};
+    
+    queue<robot> q;
+    q.push(robot(0, 0, 0)); // (0, 0), 가로 방향
+    check[0][0][0] = 0;
+    
+    while (!q.empty()) {
+        int cur_r1 = q.front().r;
+        int cur_c1 = q.front().c;
+        int cur_d1 = q.front().d;
+        
+        // 방향을 토대로 로봇의 나머지 좌표 확인
+        int cur_r2 = cur_r1 + dr[cur_d1];
+        int cur_c2 = cur_c1 + dc[cur_d1];
+        
+        int cost = check[cur_r1][cur_c1][cur_d1];
+        q.pop();
+        
+        // 만약 목표 지점에 도착했다면 종료하기
+        if (cur_r1 == N - 1 && cur_c1 == N - 2 && cur_d1 == 0) break;
+        if (cur_r1 == N - 2 && cur_c1 == N - 1 && cur_d1 == 1) break;
+        
+        // 상하좌우 이동
+        for (int i = 0; i < 4; i++) {
+            // 이동했을 때 로봇의 위치를 확인
+            int next_r1 = cur_r1 + dr[i];
+            int next_c1 = cur_c1 + dc[i];
+            
+            int next_r2 = cur_r2 + dr[i];
+            int next_c2 = cur_c2 + dc[i];
+            
+            // 로봇이 칸의 범위를 벗어나면 continue 해준다.
+            if (next_r1 < 0 || next_r1 >= N || next_c1 < 0 || next_c1 >= N) continue;
+            if (next_r2 < 0 || next_r2 >= N || next_c2 < 0 || next_c2 >= N) continue;
+            // 로봇이 있는 위치에 벽이 있다면 continue 해준다.
+            if (board[next_r1][next_c1] == 1 || board[next_r2][next_c2] == 1) continue;
+            // 이미 방문한 적이 있다면 continue 해준다.
+            if (check[next_r1][next_c1][cur_d1] != -1) continue;
+            
+            // 위 조건을 다 통과했다면 큐에 넣어주고 위치 업데이트 해준다.
+            check[next_r1][next_c1][cur_d1] = cost + 1;
+            q.push(robot(next_r1, next_c1, cur_d1));
+        }
+        
+        // 회전
+        for (int t = 0; t < 2; t++) {
+            // 로봇의 두부분 이동이 아닌 한 부분을 고정하고, 그 부분을 기준으로 상하좌우 이동해주고 올바른 회전인지 확인해준다
+            for (int i = 0; i < 4; i++) {
+                int next_r1 = cur_r1; // 고정
+                int next_c1 = cur_c1; // 고정
+                int next_r2 = cur_r1 + dr[i]; // 회전
+                int next_c2 = cur_c1 + dc[i]; // 회전
+                
+                // 만약 칸의 범위를 벗어나면 continue해준다.
+                if (next_r2 < 0 || next_r2 >= N || next_c2 < 0 || next_c2 >= N) continue;
+                
+                int dist_r = abs(cur_r2 - next_r2);
+                int dist_c = abs(cur_c2 - next_c2);
+                
+                // 시계, 반시계 방향으로 90도 회전한 경우가 아니거나
+                if (dist_r != 1 || dist_c != 1) continue;
+                // 회전하여 이동할 지점이 비어있지 않은 경우
+                if (board[next_r2][next_c2] == 1) continue;
+                
+                // 회전 시 대각 위치가 비어있지 않은 경우 -> 이 부분이 어렵다.
+                // ^의 기능 -> XOR 연산 (2주차 나머지 한 점 구할 때 사용된 방법)
+                int diag_r = cur_r1 ^ cur_r2 ^ next_r2;
+                int diag_c = cur_c1 ^ cur_c2 ^ next_c2;
+                
+                // 회전 시 대각 위치가 비어있지 않은 경우 continue해준다.
+                if (board[diag_r][diag_c] == 1) continue;
+                
+                // 회전 후, 좌표 정렬 및 direction 조정 후 큐에 등록 (기준점 체크해주는 코드)
+                if (next_r1 > next_r2) swap(next_r1, next_r2);
+                if (next_c1 > next_c2) swap(next_c1, next_c2);
+                int next_d1 = (cur_d1 == 0) ? 1 : 0;
+                
+                // 기존에 방문한 적이 없다면 큐에 넣어준다.
+                if (check[next_r1][next_c1][next_d1] == -1) {
+                    check[next_r1][next_c1][next_d1] = cost + 1;
+                    q.push(robot(next_r1, next_c1, next_d1));
+                }
+            }
+            
+            swap(cur_r1, cur_r2);
+            swap(cur_c1, cur_c2);
+        }
+    }
+    
+    int ans = min(check[N - 2][N - 1][1], check[N - 1][N - 2][0]);
+    if (ans == -1)
+        ans = max(check[N - 2][N - 1][1], check[N - 1][N - 2][0]);
+    return ans;
+}
+
