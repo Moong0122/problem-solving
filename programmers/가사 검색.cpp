@@ -117,3 +117,93 @@ vector<int> solution(vector<string> words, vector<string> queries) {
     return answer;
 }
 
+// 풀이보고 공부한 코드
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int NEXT_CNT = 26;
+
+class Trie
+{
+    private:
+        Trie* next[NEXT_CNT] = {nullptr, }; // 배열 이름이 next이다
+        int cnt = 0;
+        bool finish = false;
+    
+    public:
+        Trie() = default;
+        
+        ~Trie()
+        {
+            for (int i = 0; i < NEXT_CNT; i++) {
+                if (next[i] != nullptr) delete next[i];
+            }
+        }
+    
+        void insert(const string& str)
+        {
+            Trie* curr = this;
+            
+            for (char c : str) {
+                curr->cnt++;
+                
+                if (curr->next[c - 'a'] == nullptr)
+                    curr->next[c - 'a'] = new Trie();
+                
+                curr = curr->next[c - 'a'];
+            }
+            
+            curr->finish = true;
+        }
+    
+        Trie* find(const string& str)
+        {
+            Trie* curr = this;
+            
+            for (char c : str) {
+                curr = curr->next[c - 'a'];
+                
+                if (curr == nullptr) break;
+            }
+            
+            return curr;
+        }
+    
+        int countStartWith(const string& str)
+        {
+            string pre = str.substr(0, str.find('?'));
+            
+            Trie* p = find(pre);
+            return (p != nullptr) ? p->cnt : 0;
+        }
+    
+};
+
+vector<int> solution(vector<string> words, vector<string> queries) {
+    unordered_map<int, Trie> trie_forward;
+    unordered_map<int, Trie> trie_backward;
+    
+    for (string word : words) {
+        trie_forward[word.length()].insert(word);
+        trie_backward[word.length()].insert(string(word.rbegin(), word.rend()));
+    }
+    
+    vector<int> answer;
+    for (string query : queries) {
+        int cnt = 0;
+        
+        if (query.front() == '?') {
+            cnt = trie_backward[query.length()].countStartWith(string(query.rbegin(), query.rend()));
+        } else {
+            cnt = trie_forward[query.length()].countStartWith(query);
+        }
+        
+        answer.push_back(cnt);
+    }
+    
+    return answer;
+}
